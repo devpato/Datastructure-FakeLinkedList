@@ -1,0 +1,200 @@
+import java.util.*;
+public class LinkedListArray
+{
+private int size;
+private FakeArray adata;
+private Memory env;
+private FakePointer first;
+private FakePointer free;
+int capacity;
+
+
+   public LinkedListArray()
+   {
+        this(10, null);
+   }
+
+   public LinkedListArray(int capacity)
+   {
+        this(capacity, null);
+   }
+   public LinkedListArray(Memory memory){
+
+	this(10,memory);
+   }
+   public LinkedListArray(int capacity,Memory memory){
+      this.capacity = capacity;
+      this.env = memory;
+      size = 0;
+      adata = env.allocate(capacity);
+      first = new FakePointer(-1);
+      free =adata.addressOf();
+      for(int i = 0; i < this.capacity; i++){
+          adata.getAt(i).setNext(new FakePointer((free.get()+ i)+1));
+      }
+	 adata.getAt(capacity - 1).setNext(new FakePointer(-1));
+
+   }
+
+   public LinkedListArray(LinkedListArray copyLinkarray ){
+	this(copyLinkarray.getCapacity(),copyLinkarray.env);
+	for(int i = 0;i<copyLinkarray.getSize();i++){
+		insert(copyLinkarray.dataAt(i));
+	}
+
+   }
+   public FakeArraynew newMethod(){
+	this.env = memory;
+      	size = getSize();
+      	adata = env.allocate((capacity*2) + capacity );
+	capacity = (capacity*2) + capacity;
+      	first = new FakePointer(-1);
+      	free =adata.addressOf();
+      	for(int i = 0; i < this.capacity; i++){
+          adata.getAt(i).setNext(new FakePointer((free.get()+ i)+1));
+      }
+         adata.getAt(capacity - 1).setNext(new FakePointer(-1));
+
+   }
+
+
+
+   }
+   public boolean insert(String data){
+	System.out.println("first : "+ first);
+
+		if(free.get() == -1){
+                        return false;
+               }
+		System.out.println("check 0");
+		FakePointer fakeLastPoint =  new FakePointer(first);
+		System.out.println("firstL : "+ fakeLastPoint.get() );
+		System.out.println("first : "+ first);
+
+		if(fakeLastPoint.get() == -1){
+                        System.out.println("free " + free);
+			FakePointer fakeInsertlast = fakeLastPoint;
+                        size++;
+                        adata.getAt(free).setData(data);
+			first = free;
+                        free = adata.getAt(free).getNext();
+			adata.getAt(first).setNext(new FakePointer(-1));
+
+			return true;
+                }
+		System.out.println("check 1");
+
+		System.out.println("check 2");
+		System.out.println("check 3");
+		while(fakeLastPoint.get() != -1 ){//
+			System.out.println("check 4");
+			if(adata.getAt(fakeLastPoint).getNext().get()  == -1){
+			System.out.println("check 5");
+				FakePointer fakeInsertlast = fakeLastPoint;
+                        	size++;
+                        	adata.getAt(free).setData(data);
+                        	FakePointer temp  =adata.getAt(free).getNext();
+				adata.getAt(fakeLastPoint).setNext(free);
+				adata.getAt(free).setNext(new FakePointer(-1));
+				free = temp;
+				return true;
+	       	        }
+        	        fakeLastPoint = adata.getAt(fakeLastPoint).getNext();//
+
+		}
+		return true;
+   }
+
+  public boolean insertFront(String data){
+                if(free == null){
+			size = capacity;
+			return false;
+		}
+		if(free.get() == -1){
+                        return false;
+                }
+                if(free.get() != -1){
+			size++;// increses the space in size(actual elements in the array)
+			adata.getAt(free).setData(data);
+			FakePointer insertFakefront = adata.getAt(free).getNext();
+			adata.getAt(free).setNext(first);
+			first  = free;
+			free = insertFakefront;
+                }
+		return true;
+   }
+   public boolean remove(String data ) {
+	FakePointer fakeprevious  = new FakePointer(-1);
+	FakePointer fakecurrent = first;
+	while(fakecurrent.get() != -1){
+		if(adata.getAt(fakecurrent).getData().equals(data)){
+			if(fakeprevious.get() == -1){
+				first = adata.getAt(fakeprevious).getNext();
+			}
+			else{
+				FakePointer temp = adata.getAt(fakecurrent).getNext();
+				adata.getAt(fakeprevious).setNext(temp);
+			}
+			size--;
+			FakePointer temp = free;
+			free  = fakecurrent;
+			adata.getAt(fakecurrent).setNext(temp);
+			return true;
+		}
+	 	fakeprevious = fakecurrent;
+	 	fakecurrent = adata.getAt(fakecurrent).getNext();
+
+  	}
+	return false;
+   }
+   public int find(String toFind,int index){
+	int counter=0;
+	FakePointer fakefind = first;
+	for(int i = 0 ;i<index ;i++){
+		fakefind = adata.getAt(fakefind).getNext();
+	}
+	while(fakefind.get() != -1){
+		if(adata.getAt(fakefind).getData().equals(toFind)){
+		 return counter;
+		}
+		counter++;
+	}
+	return -1;
+   }
+  public String dataAt(int index){
+	FakePointer fakeDataAt = first;
+	while(fakeDataAt.get() != -1){
+		fakeDataAt =  adata.getAt(fakeDataAt).getNext();
+		index--;
+		if(index == 0){
+
+			return adata.getAt(fakeDataAt).getData();
+		}
+	}
+	return " ";
+ }
+   public int getCapacity()
+   {
+      return capacity;
+   }
+   public int getSize()
+   {
+      return size;
+   }
+  public String rawOutput(){
+	String result = "";
+	result +=  "First fake pointer =  " + first + "\n" ;
+	result += "Free fake pointer =  " + free + "\n";
+	FakePointer raw = adata.addressOf();
+	for(int i = 0 ;i < capacity ; i++){
+		FakePointer raw2 = new  FakePointer(raw.get() + i);
+		result +=  "The address is  " + (raw.get() + i) + adata.getAt(raw2).getData()+ "   " + "next : " +adata.getAt(raw2).getNext() + "\n";
+
+
+	}
+
+
+	return result;
+ }
+}
+
